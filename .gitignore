@@ -1,0 +1,3 @@
+src/*.o
+src/tn_fnds
+*.exe
