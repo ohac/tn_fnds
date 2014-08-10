@@ -9,8 +9,8 @@
 // 現状で分かっているバグ
 // decimateForF0 : 開始直後・終了間際4サンプルくらいに誤差が入ります．
 //#include <fftsg.h>
-#include <fftw3.h>
-//#include <fft.h>
+//#include <fftw3.h>
+#include <fft.h>
 
 #include <stdlib.h>
 #include <windows.h>

@@ -58,7 +58,7 @@ void F0ToFile(double* f0, int tLen)
 	fclose(file);
 }
 
-void speqToFile(fftw_complex * spec, int fftl)
+void speqToFile(fft_complex * spec, int fftl)
 {
 	FILE *file;
 	int i;
@@ -432,16 +432,16 @@ void f0Lpf(double *f0, int tLen, int flag_d)
 }
 
 //イコライジング用スペクトル作成
-void createWaveSpec(double *x, int xLen, int fftl, int equLen, fftw_complex **waveSpecgram)
+void createWaveSpec(double *x, int xLen, int fftl, int equLen, fft_complex **waveSpecgram)
 {
 	int i, j;
 
 	double *waveBuff;
-	fftw_plan			wave_f_FFT;				// FFTセット
-	fftw_complex		*waveSpec;	// スペクトル
+	fft_plan			wave_f_fft;				// fftセット
+	fft_complex		*waveSpec;	// スペクトル
 	waveBuff = (double *)malloc(sizeof(double) * fftl);
-	waveSpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
-	wave_f_FFT = fftw_plan_dft_r2c_1d(fftl, waveBuff, waveSpec, FFTW_ESTIMATE);	
+	waveSpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
+	wave_f_fft = fft_plan_dft_r2c_1d(fftl, waveBuff, waveSpec, FFT_ESTIMATE);	
 
 	int offset;
 
@@ -453,7 +453,7 @@ void createWaveSpec(double *x, int xLen, int fftl, int equLen, fftw_complex **wa
 										(0.5 - 0.5 * cos(2.0*PI*(double)j/(double)fftl));//窓を掛ける;
 
 		//fft実行
-		fftw_execute(wave_f_FFT);
+		fft_execute(wave_f_fft);
 
 		//スペクトルを格納
 		for(j = 0;j < fftl/2+1; j++)
@@ -463,22 +463,22 @@ void createWaveSpec(double *x, int xLen, int fftl, int equLen, fftw_complex **wa
 		}
 	}
 
-	fftw_destroy_plan(wave_f_FFT);
+	fft_destroy_plan(wave_f_fft);
 	free(waveBuff);
 	free(waveSpec);
 
 }
 
 //スペクトルから波形を再構築
-void rebuildWave(double *x, int xLen, int fftl, int equLen, fftw_complex **waveSpecgram)
+void rebuildWave(double *x, int xLen, int fftl, int equLen, fft_complex **waveSpecgram)
 {
 	int i, j;
 	double *waveBuff;
-	fftw_plan			wave_i_FFT;				// FFTセット
-	fftw_complex		*waveSpec;	// スペクトル
+	fft_plan			wave_i_fft;				// fftセット
+	fft_complex		*waveSpec;	// スペクトル
 	waveBuff = (double *)malloc(sizeof(double) * fftl);
-	waveSpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
-	wave_i_FFT = fftw_plan_dft_c2r_1d(fftl, waveSpec, waveBuff, FFTW_ESTIMATE);	
+	waveSpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
+	wave_i_fft = fft_plan_dft_c2r_1d(fftl, waveSpec, waveBuff, FFT_ESTIMATE);	
 
 	int offset;
 	for(i = 0;i < xLen;i++) x[i] = 0;
@@ -496,7 +496,7 @@ void rebuildWave(double *x, int xLen, int fftl, int equLen, fftw_complex **waveS
 
 
 		//fft実行
-		fftw_execute(wave_i_FFT);
+		fft_execute(wave_i_fft);
 
 		for(j = 0;j < fftl; j++) waveBuff[j] /= fftl;
 
@@ -505,24 +505,24 @@ void rebuildWave(double *x, int xLen, int fftl, int equLen, fftw_complex **waveS
 
 	}
 
-	fftw_destroy_plan(wave_i_FFT);
+	fft_destroy_plan(wave_i_fft);
 	free(waveBuff);
 	free(waveSpec);
 
 }
 
 //Bフラグ（息）を適用する
-void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **waveSpecgram,int equLen, int fftl, int flag_B)
+void breath2(double *f0, int tLen, int fs, double *x, int xLen, fft_complex **waveSpecgram,int equLen, int fftl, int flag_B)
 {
 	int i, j;
 
-	//ノイズFFTの準備
+	//ノイズfftの準備
 	double *noiseData;
 	double *noiseBuff;
 	double *noise;
-	fftw_plan			noise_f_FFT;				// FFTセット
-	fftw_plan			noise_i_FFT;				// FFTセット
-	fftw_complex		*noiseSpec;	// スペクトル
+	fft_plan			noise_f_fft;				// fftセット
+	fft_plan			noise_i_fft;				// fftセット
+	fft_complex		*noiseSpec;	// スペクトル
 
 	noiseData = (double *)malloc(sizeof(double) * xLen);
 	for(i=0;i < xLen; i++) noiseData[i] = (double)rand()/(RAND_MAX+1) - 0.5;
@@ -530,13 +530,13 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 	for(i=0;i < xLen; i++) noise[i] = 0.0;
 //	for(i=0;i < xLen; i++) noiseData[i] *= noiseData[i] * (noiseData[i] < 0)? -1 : 1;//ノイズの分布をいじる
 	noiseBuff = (double *)malloc(sizeof(double) * fftl);
-	noiseSpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
-	noise_f_FFT = fftw_plan_dft_r2c_1d(fftl, noiseBuff, noiseSpec, FFTW_ESTIMATE);	
-	noise_i_FFT = fftw_plan_dft_c2r_1d(fftl, noiseSpec, noiseBuff, FFTW_ESTIMATE);	
+	noiseSpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
+	noise_f_fft = fft_plan_dft_r2c_1d(fftl, noiseBuff, noiseSpec, FFT_ESTIMATE);	
+	noise_i_fft = fft_plan_dft_c2r_1d(fftl, noiseSpec, noiseBuff, FFT_ESTIMATE);	
 
-	//waveFFTの準備
-	fftw_complex		*waveSpec;	// スペクトル
-	waveSpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
+	//wavefftの準備
+	fft_complex		*waveSpec;	// スペクトル
+	waveSpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
 
 	int offset;
 	double volume;
@@ -562,7 +562,7 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 										(0.5 - 0.5*cos(2.0*PI*(double)j/(double)fftl));//窓を掛ける;
 
 		//fft実行
-		fftw_execute(noise_f_FFT);
+		fft_execute(noise_f_fft);
 
 		//スペクトル包絡（超手抜き）
 		for(j = 0;j < fftl/2+1; j++) waveSpec[j][0] = sqrt(waveSpecgram[i][j][0] * waveSpecgram[i][j][0] + waveSpecgram[i][j][1] * waveSpecgram[i][j][1]);
@@ -626,8 +626,8 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 		noiseSpec[0][1] = 0.0;
 		noiseSpec[fftl/2][1] = 0.0;
 
-		//逆FFT
-		fftw_execute(noise_i_FFT);
+		//逆fft
+		fft_execute(noise_i_fft);
 		for(j = 0;j < fftl; j++) noiseBuff[j] /= fftl;
 		
 		//窓を掛ける
@@ -646,8 +646,8 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 	for(i = 0;i < xLen;i++) x[i] = x[i] * waveRatio + noise[i] * noiseRatio;
 
 	//後処理
-	fftw_destroy_plan(noise_f_FFT);
-	fftw_destroy_plan(noise_i_FFT);
+	fft_destroy_plan(noise_f_fft);
+	fft_destroy_plan(noise_i_fft);
 	free(noise);
 	free(noiseData);
 	free(noiseBuff);
@@ -656,7 +656,7 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 }
 
 //Oフラグ（声の強さ）
-void Opening(double *f0, int tLen, int fs, fftw_complex **waveSpecgram,int equLen, int fftl, int flag_O)
+void Opening(double *f0, int tLen, int fs, fft_complex **waveSpecgram,int equLen, int fftl, int flag_O)
 {
 	int i, j;
 	double opn = (double) flag_O / 100.0;
@@ -1143,34 +1143,34 @@ int main(int argc, char *argv[])
 	printf("WORLD: %d [msec]\n", timeGetTime() - elapsedTime);
 
 	//イコライジング
-	int equFFTL = 1024;//イコライザーのFFT長
-	int equLen = (signalLen2 / (equFFTL/2)) - 1; //繰り返し回数
-	fftw_complex **waveSpecgram;  //スペクトル
-	waveSpecgram = (fftw_complex **)malloc(sizeof(fftw_complex *) * equLen);
-	for(i = 0;i < equLen;i++) waveSpecgram[i] = (fftw_complex *)malloc(sizeof(fftw_complex) * (equFFTL/2+1));
+	int equfftL = 1024;//イコライザーのfft長
+	int equLen = (signalLen2 / (equfftL/2)) - 1; //繰り返し回数
+	fft_complex **waveSpecgram;  //スペクトル
+	waveSpecgram = (fft_complex **)malloc(sizeof(fft_complex *) * equLen);
+	for(i = 0;i < equLen;i++) waveSpecgram[i] = (fft_complex *)malloc(sizeof(fft_complex) * (equfftL/2+1));
 
 	//スペクトル作成
 	if(flag_B > 50 || flag_O != 0)
 	{
-		createWaveSpec(y, signalLen2, equFFTL, equLen, waveSpecgram);
+		createWaveSpec(y, signalLen2, equfftL, equLen, waveSpecgram);
 	}
 
 	//声の強さ
 	if(flag_O != 0)
 	{
-		Opening(fixedF0, tLen2, fs, waveSpecgram, equLen, equFFTL, flag_O);
+		Opening(fixedF0, tLen2, fs, waveSpecgram, equLen, equfftL, flag_O);
 	}
 
 	//イコライズ結果を波形に反映
 	if(flag_O != 0)
 	{
-		rebuildWave(y, signalLen2, equFFTL, equLen, waveSpecgram);
+		rebuildWave(y, signalLen2, equfftL, equLen, waveSpecgram);
 	}
 
 	//ノイズ
 	if(flag_B > 50)
 	{
-		 breath2(fixedF0, tLen2, fs, y, signalLen2, waveSpecgram, equLen, equFFTL, flag_B);
+		 breath2(fixedF0, tLen2, fs, y, signalLen2, waveSpecgram, equLen, equfftL, flag_B);
 	}
 
 	// オフセットの設定

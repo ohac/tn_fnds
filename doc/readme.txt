@@ -1,4 +1,4 @@
-UTAU用音声合成エンジン『tn_fnds』 version 0.0.7
+UTAU用音声合成エンジン『tn_fnds』 version 0.0.9
 
 ■概要
 このプログラムは森勢将雅氏のWORLD版UTAU合成エンジン『エターナルフォースブリサンプラー 
@@ -8,12 +8,6 @@ UTAU用音声合成エンジン『tn_fnds』 version 0.0.7
 合成手法の基本的な考え方は変えていません。（変えていないつもりです。）
 
 作成にあたっては、飴屋／菖蒲氏のworld4utauのソースコードを流用させていただいております。
-
-■使い方
-動作には、fftwのdllが必要です。
-以下のリンク先の『32-bit version: fftw-3.3-dll32.zip (1.8MB)』(2012/2/19時点)をダウン
-ロードし、中に入っているlibfftw3-3.dll をtn_fnds.exeと同じフォルダに解凍してください。
-http://www.fftw.org/install/windows.html
 
 ■制約事項
 ・使用できないフラグが多数あります。
@@ -79,6 +73,7 @@ http://www.fftw.org/install/windows.html
 
 2012/6/9   ver0.0.7 ・内部処理の調整により音質の向上を図った
 2012/6/9   ver0.0.8 ・内部処理の調整により音質の向上を図った（修正）
+2013/4/11  ver0.0.9 ・FFTWを使わないようにした
 
 ■最新版入手先
 　ZteerのUTAU関連物置き場

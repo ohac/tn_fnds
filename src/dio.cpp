@@ -4,12 +4,12 @@
 #include "world.h"
 
 // 内部関数(ユーザは触らないほうが良い)
-//void rawEventByDio(double boundaryF0, double fs, fftw_complex *xSpec, int xLength, int fftl, double shiftTime, double f0Floor, double f0Ceil, double *timeAxis, int tLen, 
+//void rawEventByDio(double boundaryF0, double fs, fft_complex *xSpec, int xLength, int fftl, double shiftTime, double f0Floor, double f0Ceil, double *timeAxis, int tLen, 
 //				   double *f0Deviations, double *interpolatedF0);
 //tn_fnds v0.0.4
-void rawEventByDio(double boundaryF0, double fs, fftw_complex *xSpec, int xLength, int fftl, double shiftTime, double f0Floor, double f0Ceil, double *timeAxis, int tLen, 
+void rawEventByDio(double boundaryF0, double fs, fft_complex *xSpec, int xLength, int fftl, double shiftTime, double f0Floor, double f0Ceil, double *timeAxis, int tLen, 
 				   double *f0Deviations, double *interpolatedF0,
-				   fftw_plan &forwardFFT, fftw_plan &inverseFFT, double *equivalentFIR, fftw_complex *eSpec);
+				   fft_plan &forwardFFT, fft_plan &inverseFFT, double *equivalentFIR, fft_complex *eSpec);
 void zeroCrossingEngine(double *x, int xLen, double fs,
 						double *eLocations, double *iLocations, double *intervals, int *iLen);
 long decimateForF0(double *x, int xLen, double *y, int r);
@@ -85,11 +85,11 @@ void dio(double *x, int xLen, int fs, double framePeriod,
 	}
 
 	// 波形のスペクトルを事前に計算（ここは高速化の余地有り）
-	fftw_plan			forwardFFT;				// FFTセット
-	fftw_complex		*ySpec;	// スペクトル
-	ySpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
-	forwardFFT = fftw_plan_dft_r2c_1d(fftl, y, ySpec, FFTW_ESTIMATE);
-	fftw_execute(forwardFFT); // FFTの実行
+	fft_plan			forwardFFT;				// FFTセット
+	fft_complex		*ySpec;	// スペクトル
+	ySpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
+	forwardFFT = fft_plan_dft_r2c_1d(fftl, y, ySpec, FFT_ESTIMATE);
+	fft_execute(forwardFFT); // FFTの実行
 
 	// temporary values
 	double *	interpolatedF0;
@@ -101,15 +101,15 @@ void dio(double *x, int xLen, int fs, double framePeriod,
 		timeAxis[i] = (double)i * framePeriod/1000.0;
 
 	//tn_fnds v0.0.4 FFTWのプランを再利用するため、DIO側でメモリ確保、プランの作成を行う
-	fftw_destroy_plan(forwardFFT);
+	fft_destroy_plan(forwardFFT);
 	double *equivalentFIR;
 	equivalentFIR = (double *)malloc(sizeof(double) * fftl);
-//	fftw_plan	forwardFFT;				// FFTセット
-	fftw_plan	inverseFFT;
-	fftw_complex		*eSpec;	// スペクトル
-	eSpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
-	forwardFFT = fftw_plan_dft_r2c_1d(fftl, equivalentFIR, eSpec, FFTW_ESTIMATE);
-	inverseFFT = fftw_plan_dft_c2r_1d(fftl, eSpec, equivalentFIR, FFTW_ESTIMATE);
+//	fft_plan	forwardFFT;				// FFTセット
+	fft_plan	inverseFFT;
+	fft_complex		*eSpec;	// スペクトル
+	eSpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
+	forwardFFT = fft_plan_dft_r2c_1d(fftl, equivalentFIR, eSpec, FFT_ESTIMATE);
+	inverseFFT = fft_plan_dft_c2r_1d(fftl, eSpec, equivalentFIR, FFT_ESTIMATE);
 
 	// イベントの計算 (4つのゼロ交差．詳しくは論文にて)
 	for(i = 0;i <= nBands;i++)
@@ -158,8 +158,8 @@ void dio(double *x, int xLen, int fs, double framePeriod,
 	free(bestF0);
 	free(interpolatedF0);
 	free(f0Deviations);
-	fftw_destroy_plan(forwardFFT);
-	fftw_destroy_plan(inverseFFT);
+	fft_destroy_plan(forwardFFT);
+	fft_destroy_plan(inverseFFT);
 	free(ySpec);
 	for(i = 0;i <= nBands;i++)
 	{
@@ -410,9 +410,9 @@ void postprocessing(double framePeriod, double f0Floor, int candidates, int xLen
 }
 
 // イベントを計算する内部関数 (内部変数なので引数・戻り値に手加減なし)
-void rawEventByDio(double boundaryF0, double fs, fftw_complex *xSpec, int xLength, int fftl, double framePeriod, double f0Floor, double f0Ceil, double *timeAxis, int tLen, 
+void rawEventByDio(double boundaryF0, double fs, fft_complex *xSpec, int xLength, int fftl, double framePeriod, double f0Floor, double f0Ceil, double *timeAxis, int tLen, 
 				   double *f0Deviations, double *interpolatedF0,
-				   fftw_plan &forwardFFT, fftw_plan &inverseFFT, double *equivalentFIR, fftw_complex *eSpec)
+				   fft_plan &forwardFFT, fft_plan &inverseFFT, double *equivalentFIR, fft_complex *eSpec)
 {
 	int i;
 	int halfAverageLength = (int)(fs / boundaryF0 / 2 + 0.5);
@@ -423,11 +423,11 @@ void rawEventByDio(double boundaryF0, double fs, fftw_complex *xSpec, int xLengt
 	nuttallWindow(halfAverageLength*4, equivalentFIR);
 
 //tn_fnds v0.0.4 FFTWプランはDIO本体で作成することにした
-//	fftw_plan			forwardFFT;				// FFTセット
-//	fftw_complex		*eSpec;	// スペクトル
-//	eSpec = (fftw_complex *)malloc(sizeof(fftw_complex) * fftl);
-//	forwardFFT = fftw_plan_dft_r2c_1d(fftl, equivalentFIR, eSpec, FFTW_ESTIMATE);
-	fftw_execute(forwardFFT); // FFTの実行
+//	fft_plan			forwardFFT;				// FFTセット
+//	fft_complex		*eSpec;	// スペクトル
+//	eSpec = (fft_complex *)malloc(sizeof(fft_complex) * fftl);
+//	forwardFFT = fft_plan_dft_r2c_1d(fftl, equivalentFIR, eSpec, FFT_ESTIMATE);
+	fft_execute(forwardFFT); // FFTの実行
 
 	// 複素数の掛け算
 	double tmp;
@@ -441,9 +441,9 @@ void rawEventByDio(double boundaryF0, double fs, fftw_complex *xSpec, int xLengt
 
 	// 低域通過フィルタリング
 //tn_fnds v0.0.4 FFTWプランはDIO本体で作成することにした
-//	fftw_plan	 inverseFFT;
-//	inverseFFT = fftw_plan_dft_c2r_1d(fftl, eSpec, equivalentFIR, FFTW_ESTIMATE);
-	fftw_execute(inverseFFT);
+//	fft_plan	 inverseFFT;
+//	inverseFFT = fft_plan_dft_c2r_1d(fftl, eSpec, equivalentFIR, FFT_ESTIMATE);
+	fft_execute(inverseFFT);
 	// バイアス（低域通過フィルタによる遅延）の除去
 	for(i = 0;i < xLength;i++) equivalentFIR[i] = equivalentFIR[i+indexBias];
 
@@ -530,8 +530,8 @@ void rawEventByDio(double boundaryF0, double fs, fftw_complex *xSpec, int xLengt
 	free(nELocations); free(pELocations); free(dnELocations); free(dpELocations);
 	free(nILocations); free(pILocations); free(dnILocations); free(dpILocations);
 	free(nIntervals); free(pIntervals); free(dnIntervals); free(dpIntervals);
-//	fftw_destroy_plan(inverseFFT);	
-//	fftw_destroy_plan(forwardFFT);
+//	fft_destroy_plan(inverseFFT);	
+//	fft_destroy_plan(forwardFFT);
 //	free(eSpec);
 //	free(equivalentFIR);
 }
