@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <windows.h>
 
@@ -1192,7 +1193,9 @@ int main(int argc, char *argv[])
 	for(i = 0;i < signalLen2;i++) output[i] = (short)(32768.0*(y[i]*0.5 * volume/maxAmp));
 
 	fp = fopen(argv[1], "rb");
+size_t result =
 	fread(header, sizeof(char), 22, fp);
+assert(result == 22);
 	fclose(fp);
 
 	*((short int*)(&header[22])) = 1;		//channels	 	2 	ƒ`ƒƒƒ“ƒlƒ‹”

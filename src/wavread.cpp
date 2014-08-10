@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "wavread.h"
 
 #pragma warning(disable:4996)
@@ -28,7 +29,9 @@ double * wavread(char* filename, int *fs, int *Nbit, int *waveLength, int *offse
 		return NULL;
 	}
 	//ヘッダのチェック
+size_t result =
 	fread(dataCheck, sizeof(char), 4, fp); // "RIFF"
+assert(result == 4);
 	if(0 != strcmp(dataCheck,"RIFF"))
 	{
 		fclose(fp);
@@ -36,28 +39,36 @@ double * wavread(char* filename, int *fs, int *Nbit, int *waveLength, int *offse
 		return NULL;
 	}
 	fseek(fp, 4, SEEK_CUR); // 4バイト飛ばす
+result =
 	fread(dataCheck, sizeof(char), 4, fp); // "WAVE"
+assert(result == 4);
 	if(0 != strcmp(dataCheck,"WAVE"))
 	{
 		fclose(fp);
 		printf("ヘッダWAVEが不正\n");
 		return NULL;
 	}
+result =
 	fread(dataCheck, sizeof(char), 4, fp); // "fmt "
+assert(result == 4);
 	if(0 != strcmp(dataCheck,"fmt "))
 	{
 		fclose(fp);
 		printf("ヘッダfmt が不正\n");
 		return NULL;
 	}
+result =
 	fread(dataCheck, sizeof(char), 4, fp); //1 0 0 0
+assert(result == 4);
 	if(!(16 == dataCheck[0] && 0 == dataCheck[1] && 0 == dataCheck[2] && 0 == dataCheck[3]))
 	{
 		fclose(fp);
 		printf("ヘッダfmt (2)が不正\n");
 		return NULL;
 	}
+result =
 	fread(dataCheck, sizeof(char), 2, fp); //1 0
+assert(result == 2);
 	if(!(1 == dataCheck[0] && 0 == dataCheck[1]))
 	{
 		fclose(fp);
@@ -65,7 +76,9 @@ double * wavread(char* filename, int *fs, int *Nbit, int *waveLength, int *offse
 		return NULL;
 	}
 	/*
+result =
 	fread(dataCheck, sizeof(char), 2, fp); //1 0
+assert(result == 2);
 	if(!(1 == dataCheck[0] && 0 == dataCheck[1]))
 	{
 		fclose(fp);
@@ -74,10 +87,14 @@ double * wavread(char* filename, int *fs, int *Nbit, int *waveLength, int *offse
 	}
 	*/
 	//チャンネル
+result =
 	fread(&channel, sizeof(short int), 1, fp); 
+assert(result == 1);
 
 	// サンプリング周波数
+result =
 	fread(forIntNumber, sizeof(char), 4, fp);
+assert(result == 4);
 	*fs = 0;
 	for(int i = 3;i >= 0;i--)
 	{
@@ -85,22 +102,32 @@ double * wavread(char* filename, int *fs, int *Nbit, int *waveLength, int *offse
 	}
 	// 量子化ビット数
 	fseek(fp, 6, SEEK_CUR); // 6バイト飛ばす
+result =
 	fread(forIntNumber, sizeof(char), 2, fp);
+assert(result == 2);
 	*Nbit = forIntNumber[0];
 	// ヘッダ
 	int dummy;
+result =
 	fread(dataCheck, sizeof(char), 4, fp); // "data"
+assert(result == 4);
 	while(0 != strcmp(dataCheck,"data"))
 	{
+result =
 		fread(&dummy, sizeof(char), 4, fp);
+assert(result == 4);
 		fseek(fp, dummy, SEEK_CUR); // 無関係なチャンクを読み飛ばす
+result =
 		fread(dataCheck, sizeof(char), 4, fp); // "data"
+assert(result == 4);
 //		fclose(fp);
 //		printf("ヘッダdataが不正\n");
 //		return NULL;
 	}
 	// サンプル点の数
+result =
 	fread(forIntNumber, sizeof(char), 4, fp); // "data"
+assert(result == 4);
 	*waveLength = 0;
 	for(int i = 3;i >= 0;i--)
 	{
@@ -132,7 +159,9 @@ double * wavread(char* filename, int *fs, int *Nbit, int *waveLength, int *offse
 
 	unsigned char *wavbuff;
 	wavbuff = (unsigned char *) malloc(sizeof(char) * *waveLength * quantizationByte * channel);
+result =
 	fread(wavbuff, sizeof(char), *waveLength * quantizationByte * channel, fp); // 全部メモリに読み込む
+assert(result == *waveLength * quantizationByte * channel);
 	int seekindex;
 
 	for(int i = 0;i < *waveLength;i++)
