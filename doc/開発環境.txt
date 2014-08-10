@@ -1,0 +1,6 @@
+OS 	: Windows 7 64 bit
+CPU 	: Core2Duo 3.00 GHz
+メモリ 	: 6 GB
+
+開発ソフト
+Microsoft Visual C++ 2010
