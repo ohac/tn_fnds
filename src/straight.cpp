@@ -31,7 +31,7 @@ void tandemStraight(double *x, int xLen, int fs, double *timeAxis, double *f0,
 	double correctionForBlackman = 2.5; // ‚±‚±‚ð•ÏX‚µ‚Ä‚Í‚¢‚¯‚È‚¢D
 
 	int	fftl = (int)pow(2.0, 1.0+(int)(log(correctionForBlackman*fs/f0LowLimit+1) / log(2.0)));
-	int tLen = getSamplesForDIO(fs, xLen);
+	int tLen = getSamplesForDIO(fs, xLen, framePeriod);
 
 	double currentTime;
 	double currentF0;
@@ -54,7 +54,7 @@ void tandemStraight(double *x, int xLen, int fs, double *timeAxis, double *f0,
 }
 
 // matlab‚É‡‚¸‚éŠÛ‚ß
-int round(double x)
+static int myround2(double x)
 {
 	if(x > 0)
 		return (int)(x+0.5);
@@ -132,8 +132,8 @@ void tandemSTRAIGHTGeneralBody(double *x, int xLen, int fs, double f0, double t,
 
 	for(i = 0;i <= nFragment*2;i++)
 	{
-		preIndex[i]  = min(xLen, max(1, round((t-t0/4.0)*(double)fs+1+baseIndex[i]) ) ) - 1;
-		postIndex[i] = min(xLen, max(1, round((t+t0/4.0)*(double)fs+1+baseIndex[i]) ) ) - 1;
+		preIndex[i]  = min(xLen, max(1, myround2((t-t0/4.0)*(double)fs+1+baseIndex[i]) ) ) - 1;
+		postIndex[i] = min(xLen, max(1, myround2((t+t0/4.0)*(double)fs+1+baseIndex[i]) ) ) - 1;
 	}
 
 	double *preSegment, *postSegment;
@@ -149,9 +149,9 @@ void tandemSTRAIGHTGeneralBody(double *x, int xLen, int fs, double f0, double t,
 		preSegment[i]  = x[preIndex[i]];
 		postSegment[i] = x[postIndex[i]];
 		preTime  = (double)baseIndex[i]/(double)fs/(correctionForBlackman/2.0) + 
-			((t-t0/4.0)*(double)fs - (double)(round((t-t0/4.0)*(double)fs))) / (double)fs;
+			((t-t0/4.0)*(double)fs - (double)(myround2((t-t0/4.0)*(double)fs))) / (double)fs;
 		postTime = (double)baseIndex[i]/(double)fs/(correctionForBlackman/2.0) + 
-			((t+t0/4.0)*(double)fs - (double)(round((t+t0/4.0)*(double)fs))) / (double)fs;
+			((t+t0/4.0)*(double)fs - (double)(myround2((t+t0/4.0)*(double)fs))) / (double)fs;
 
 		preWindow[i]  = 0.5*cos(PI*preTime*f0) +0.42+0.08*cos(2.0*PI*preTime*f0);
 		postWindow[i] = 0.5*cos(PI*postTime*f0)+0.42+0.08*cos(2.0*PI*postTime*f0);

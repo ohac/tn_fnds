@@ -23,6 +23,8 @@
 
 #include <math.h>
 
+inline DWORD timeGetTime() { return 0; }
+
 // 13引数のうち
 // 1 入力ファイル（OK）
 // 2 出力ファイル（OK）
@@ -525,7 +527,7 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 	fftw_complex		*noiseSpec;	// スペクトル
 
 	noiseData = (double *)malloc(sizeof(double) * xLen);
-	for(i=0;i < xLen; i++) noiseData[i] = (double)rand()/(RAND_MAX+1) - 0.5;
+	for(i=0;i < xLen; i++) noiseData[i] = (double)rand()/RAND_MAX - 0.5;
 	noise = (double *)malloc(sizeof(double) * xLen);
 	for(i=0;i < xLen; i++) noise[i] = 0.0;
 //	for(i=0;i < xLen; i++) noiseData[i] *= noiseData[i] * (noiseData[i] < 0)? -1 : 1;//ノイズの分布をいじる
@@ -569,7 +571,7 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 		for(j = 0;j < fftl/2+1; j++) waveSpec[j][0] = log10(waveSpec[j][0]+0.00000001);//対数化
 		for(j = 0;j < fftl/2+1; j++) waveSpec[j][1] = waveSpec[j][0];
 
-		nowIndex = max(0, min(tLen-1, (double)(offset + fftl / 2) / fs * 1000 / FRAMEPERIOD));
+		nowIndex = max(0.0, min((double)tLen-1, (double)(offset + fftl / 2) / fs * 1000 / FRAMEPERIOD));
 		sIndex = min(tLen -2, (int)nowIndex);
 		eIndex = sIndex + 1;
 		
@@ -641,7 +643,7 @@ void breath2(double *f0, int tLen, int fs, double *x, int xLen, fftw_complex **w
 	}
 	
 	//ノイズを合成
-	double noiseRatio = max(0, (double)(flag_B - 50) / 50.0);
+	double noiseRatio = max(0.0, (double)(flag_B - 50) / 50.0);
 	double waveRatio = 1 - noiseRatio;
 	for(i = 0;i < xLen;i++) x[i] = x[i] * waveRatio + noise[i] * noiseRatio;
 

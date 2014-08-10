@@ -164,7 +164,7 @@ void filterForDecimate(double *x, int xLen, double *y, int r)
 }
 
 // matlabに順ずる丸め
-int round(double x)
+int myround(double x)
 {
 	if(x > 0)
 		return (int)(x+0.5);
@@ -172,8 +172,9 @@ int round(double x)
 		return (int)(x-0.5);
 }
 
+#if 0
 // 差分
-void diff(double *x, int xLength, double *ans)
+static void mydiff(double *x, int xLength, double *ans)
 {
 	for(int i = 0;i < xLength-1;i++)
 	{
@@ -181,7 +182,6 @@ void diff(double *x, int xLength, double *ans)
 	}
 	return;
 }
-
 
 // サンプリング間隔が等間隔に限定し高速に動作するinterp1．
 // 基本的には同じだが，配列の要素数を明示的に指定する必要がある．
@@ -202,7 +202,7 @@ void interp1Q(double x, double shift, double *y, int xLength, double *xi, int xi
 		xiBase[i] = (int)floor((xi[i] - x) / deltaX);
 		xiFraction[i] = (double)(xi[i]-x)/deltaX - (double)xiBase[i];
 	}
-	diff(y, xLength, deltaY);
+	mydiff(y, xLength, deltaY);
 	deltaY[xLength-1] = 0.0;
 
 	for(i = 0;i < xiLength;i++)
@@ -214,6 +214,7 @@ void interp1Q(double x, double shift, double *y, int xLength, double *xi, int xi
 	free(xiBase);
 	free(deltaY);
 }
+#endif
 
 // xorshift法と中心極限定理との組み合わせ
 float randn(void) 
