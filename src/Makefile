@@ -1,11 +1,11 @@
 OBJS = dio.o matlabfunctions.o platinum.o star.o synthesis.o test.o fft.o wavread.o
 CXX = g++
-CFLAGS = -O
+CFLAGS = -O -msse3
 INCLUDES = -I.
 LIBS = -lfftw3
 
-tn_fnds : $(OBJS)
-	$(CXX) -o $@ $(OBJS) $(LIBS)
+tn_fnds : $(OBJS) fft.h mmsystem.h windows.h wavread.h world.h
+	$(CXX) -o $@ $(OBJS) $(LIBS) $(CFLAGS)
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(INCLUDES) -c $<
