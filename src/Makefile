@@ -1,5 +1,4 @@
-OBJS = dio.o matlabfunctions.o platinum.o star.o straight.o synthesis.o test.o wavread.o
-#OBJS = dio.o matlabfunctions.o platinum.o star.o straight.o synthesis.o test.o wavread.o
+OBJS = dio.o matlabfunctions.o platinum.o star.o synthesis.o test.o fft.o wavread.o
 CXX = g++
 CFLAGS = -O
 INCLUDES = -I.
