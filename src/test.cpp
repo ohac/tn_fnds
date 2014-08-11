@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <assert.h>
 
 #include <windows.h>
@@ -24,7 +25,7 @@
 
 #include <math.h>
 
-inline DWORD timeGetTime() { return 0; }
+inline DWORD timeGetTime() { return (DWORD)time(NULL) * 1000; }
 
 // 13引数のうち
 // 1 入力ファイル（OK）
@@ -53,7 +54,7 @@ void F0ToFile(double* f0, int tLen)
 	FILE *file;
 	int i;
 
-	file = fopen("D:\\data\\YSS\\UTAU\\efb-gw20111228\\f0list.txt","w");
+	file = fopen("/tmp/f0list.txt", "w");
 	for(i = 0; i < tLen; i++)
 	{
 		fprintf(file,"%d,%f\n",i ,f0[i]);
@@ -66,7 +67,7 @@ void speqToFile(fft_complex * spec, int fftl)
 	FILE *file;
 	int i;
 
-	file = fopen("D:\\data\\YSS\\UTAU\\efb-gw20111228\\speqlist.txt","w");
+	file = fopen("/tmp/speqlist.txt", "w");
 	for(i = 0; i < fftl/2+1; i++)
 	{
 		fprintf(file,"%d,%f\n",i ,spec[i][0]);

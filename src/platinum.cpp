@@ -13,7 +13,7 @@ void pulseToFile(int pCount, double *pulseLocations, int *residualSpecgramLength
 	FILE *file;
 	int i;
 
-	file = fopen("D:\\data\\YSS\\UTAU\\efb-gw20111228\\pulse.txt","w");
+	file = fopen("/tmp/pulse.txt", "w");
 	for(i = 0; i < pCount; i++)
 	{
 		fprintf(file,"%d,%f,%d\n",i ,pulseLocations[i], residualSpecgramLength[i]);
@@ -30,7 +30,7 @@ void zeroXToFile(double *x, int xLen, double *f0interpolatedRaw, double *totalPh
 	zeroX = (int *)malloc(sizeof(int) * xLen);
 	for(i=0;i<xLen;i++)zeroX[i] = 0;
 	for(i=0;i<pCount;i++)zeroX[int(pulseLocations[i] * fs)] = 1;
-	file = fopen("D:\\data\\YSS\\UTAU\\efb-gw20111228\\zerocross.txt","w");
+	file = fopen("/tmp/zerocross.txt", "w");
 	for(i = 0; i < xLen; i++)
 	{
 		fprintf(file,"%d,%f,%f,%f,%d",i ,x[i] ,f0interpolatedRaw[i], totalPhase[i], zeroX[i]);

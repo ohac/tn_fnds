@@ -385,7 +385,7 @@ void postprocessing(double framePeriod, double f0Floor, int candidates, int xLen
 /*
 	FILE *file;
 
-	file = fopen("D:\\data\\YSS\\UTAU\\efb-gw20111228\\f0map.txt","w");
+	file = fopen("/tmp/f0map.txt", "w");
 
 	for(k = 1;k < candidates;k++) fprintf(file,",map%d",k);
 	for(k = 1;k < candidates;k++) fprintf(file,",stab%d",k);
