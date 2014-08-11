@@ -163,6 +163,7 @@ void filterForDecimate(double *x, int xLen, double *y, int r)
 	}
 }
 
+#if 0
 // matlab‚É‡‚¸‚éŠÛ‚ß
 int myround(double x)
 {
@@ -172,7 +173,6 @@ int myround(double x)
 		return (int)(x-0.5);
 }
 
-#if 0
 // ·•ª
 static void mydiff(double *x, int xLength, double *ans)
 {
