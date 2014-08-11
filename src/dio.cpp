@@ -1,5 +1,6 @@
 //tn_fnds v0.0.5   2012/3/17
 //追加されているコメントには誤りがあるかもしれません。
+#include <math.h>
 
 #include "world.h"
 
@@ -242,7 +243,7 @@ void postprocessing(double framePeriod, double f0Floor, int candidates, int xLen
 
 	// 第一のステップ (F0の跳躍防止)
 	for(i = voiceRangeMinimum;i < f0Len;i++)
-		if(abs((f0Base[i]-f0Base[i-1])/(0.00001+f0Base[i]) ) < allowedRange)
+		if(fabs((f0Base[i]-f0Base[i-1])/(0.00001+f0Base[i]) ) < allowedRange)
 			f0Step1[i] = f0Base[i];
 
 	// 第二のステップ (無声区間の切り離し)
@@ -296,12 +297,12 @@ void postprocessing(double framePeriod, double f0Floor, int candidates, int xLen
 			if(f0Step3[j+1] != 0) break;
 			refValue1 = f0Step3[j]*2 - f0Step3[j-1];
 			refValue2 = f0Step3[j];
-//			bestError = abs(refValue - f0Map[0][j+1]);
-			bestError = min(abs(refValue1 - f0Map[0][j+1]), abs(refValue2 - f0Map[0][j+1]));
+//			bestError = fabs(refValue - f0Map[0][j+1]);
+			bestError = min(fabs(refValue1 - f0Map[0][j+1]), fabs(refValue2 - f0Map[0][j+1]));
 			for(k = 1;k < candidates;k++)
 			{
-//				errorValue = abs(refValue - f0Map[k][j+1]);
-				errorValue = min(abs(refValue1 - f0Map[k][j+1]), abs(refValue2 - f0Map[k][j+1]));
+//				errorValue = fabs(refValue - f0Map[k][j+1]);
+				errorValue = min(fabs(refValue1 - f0Map[k][j+1]), fabs(refValue2 - f0Map[k][j+1]));
 //				if(errorValue < bestError)
 				if(errorValue < bestError && stabilityMap[k][j+1] < 0.1) //tn_fnds v0.0.4 安定性の低いF0は使用しない
 				{
@@ -333,12 +334,12 @@ void postprocessing(double framePeriod, double f0Floor, int candidates, int xLen
 			refValue1 = f0Step4[j]*2 - f0Step4[j-1];
 			refValue2 = f0Step4[j];
 //			refValue = f0Step4[j]*2 - f0Step4[j+1];
-			bestError = min(abs(refValue1 - f0Map[0][j+1]), abs(refValue2 - f0Map[0][j+1]));
-//			bestError = abs(refValue - f0Map[0][j-1]);
+			bestError = min(fabs(refValue1 - f0Map[0][j+1]), fabs(refValue2 - f0Map[0][j+1]));
+//			bestError = fabs(refValue - f0Map[0][j-1]);
 			for(k = 1;k < candidates;k++)
 			{
-				errorValue = min(abs(refValue1 - f0Map[k][j-1]), abs(refValue2 - f0Map[k][j-1]));
-//				errorValue = abs(refValue - f0Map[k][j-1]);
+				errorValue = min(fabs(refValue1 - f0Map[k][j-1]), fabs(refValue2 - f0Map[k][j-1]));
+//				errorValue = fabs(refValue - f0Map[k][j-1]);
 //				if(min(bestError / (refValue1+0.0001), bestError / (refValue2+0.0001)) > allowedRange)
 				if(min(bestError / (refValue1+0.0001), bestError / (refValue2+0.0001)) > allowedRange && stabilityMap[k][j-1] < 0.1) //tn_fnds v0.0.4 安定性の低いF0は使用しない
 //				if(errorValue < bestError)

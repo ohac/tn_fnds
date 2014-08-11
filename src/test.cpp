@@ -1189,7 +1189,7 @@ int main(int argc, char *argv[])
 	maxAmp = 0.0;
 	double volume;
 	volume = (double)atoi(argv[10]) / 100.0;
-	for(i = 0;i < signalLen2;i++) maxAmp = maxAmp < abs(y[i]) ? abs(y[i]) : maxAmp;
+	for(i = 0;i < signalLen2;i++) maxAmp = maxAmp < fabs(y[i]) ? fabs(y[i]) : maxAmp;
 	for(i = 0;i < signalLen2;i++) output[i] = (short)(32768.0*(y[i]*0.5 * volume/maxAmp));
 
 	fp = fopen(argv[1], "rb");

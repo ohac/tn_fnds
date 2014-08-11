@@ -2,6 +2,7 @@
 
 #include <stdio.h> // for debug
 #include <stdlib.h>
+#include <math.h>
 
 
 void tandemSTRAIGHTGeneralBody(double *x, int xLen, int fs, double f0, double t, double f0LowLimit, 
@@ -243,7 +244,7 @@ void tandemSTRAIGHTGeneralBody(double *x, int xLen, int fs, double f0, double t,
 	filler  = (double *)malloc(sizeof(double) * ((int)(f0*fftl/(double)fs)*2 + 1) );
 	tmp = (int)(f0*fftl/(double)fs);
 	for(i = 0;i < ((int)(f0*fftl/(double)fs)*2 + 1);i++)
-		xi[i] = f0 - abs((double)i-tmp)/(double)fftl*(double)fs; 
+		xi[i] = f0 - fabs((double)i-tmp)/(double)fftl*(double)fs; 
 	interp1Q(dFrequencyAxis, dShift, dSpectrum, fftl*2, xi, ((int)(f0*fftl/(double)fs)*2 + 1), filler);
 
 	for(i = 0;i < ((int)(f0*fftl/(double)fs)*2 + 1);i++)
